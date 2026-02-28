@@ -8,7 +8,7 @@
 
 ---
 
-## <a id="简体中文版本"></a> 🇨🇳 简体中文版本
+## <a id="简体中文版本"></a> 简体中文版本
 <img width="1400" height="560" alt="宣传图2" src="https://github.com/user-attachments/assets/e74ca31d-a59e-4a39-a925-a1f2f3302bee" />
 
 **Chat脉络 (ChatThread)** 是一款专为 AI 重度使用者打造的 Chrome 浏览器扩展。它能为您冗长的 AI 对话智能提取核心意图，自动生成悬浮侧边栏导航，并支持将珍贵的对话记录一键导出为图文并茂的本地文档。
@@ -48,7 +48,7 @@
 
 ---
 
-## <a id="english-version"></a> 🇬🇧 English Version
+## <a id="english-version"></a> English Version
 <img width="1400" height="560" alt="宣传图22" src="https://github.com/user-attachments/assets/02859534-fd39-4f31-b359-a140134dd0fb" />
 
 **ChatThread** is a powerful Chrome browser extension built for heavy AI users. It intelligently extracts the core intents of your lengthy AI conversations, generates a floating sidebar navigation, and allows you to export valuable chat logs into beautifully formatted local documents with a single click.

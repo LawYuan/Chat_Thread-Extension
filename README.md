@@ -21,7 +21,8 @@
 * **🗺️ 智能大纲导航**：自动提炼长对话脉络，点击侧边栏即可瞬间跳转至对应上下文，告别疯狂滚轮。<img width="1280" height="800" alt="1" src="https://github.com/user-attachments/assets/65ba7576-c385-4e3a-9676-5ea5b8670a56" />
 * **💾 沉浸式极速导出**：支持将对话（支持多选批量）导出为 **Markdown、TXT、Word** 以及 **高清 PDF**。<img width="1280" height="800" alt="3" src="https://github.com/user-attachments/assets/24d68402-7fe0-4a43-8e44-76d5205d6129" />
 
-* **🎨 原生级 UI 体验**：深度融入各家 AI 网站原生风格，完美支持深色/浅色主题（Dark Mode）自动无缝切换。
+* **🎨 原生级 UI 体验**：深度融入各家 AI 网站原生风格，完美支持深色/浅色主题（Dark Mode）自动无缝切换。<img width="1280" height="800" alt="4" src="https://github.com/user-attachments/assets/8c57b809-653f-47be-b36a-5d9dd683be01" />
+
 * **🔒 绝对的数据主权**：您的 API Key 与所有对话提取数据**仅在本地浏览器和您指定的第三方模型间流转**，没有任何中心化服务器存储您的隐私。
 
 ### 🌐 支持的 AI 平台
@@ -53,14 +54,15 @@
 **ChatThread** is a powerful Chrome browser extension built for heavy AI users. It intelligently extracts the core intents of your lengthy AI conversations, generates a floating sidebar navigation, and allows you to export valuable chat logs into beautifully formatted local documents with a single click.
 
 ### 🚀 What's New in v3.0.1
-* 🖼️ **Enhanced PDF Export**: The PDF export engine now seamlessly parses and extracts images from your conversations, ensuring no visual information is lost.<img width="1280" height="800" alt="13" src="https://github.com/user-attachments/assets/fedcb54e-6f00-47aa-bf15-b4b74d490ae3" />
+* 🖼️ **Enhanced PDF Export**: The PDF export engine now seamlessly parses and extracts images from your conversations, ensuring no visual information is lost.
 
 * 🐛 **Smoother Interaction**: Fixed an annoying bug where sidebar navigation items would flicker erratically during scrolling. Tracking your reading position is now incredibly stable.
 
 ### ✨ Key Features
 * **🗺️ Smart Outline Navigation**: Automatically summarizes long chat threads. Click any item on the sidebar to instantly jump to the corresponding context.<img width="1280" height="800" alt="11" src="https://github.com/user-attachments/assets/6edd586e-ec6a-4332-bf76-c4b5ab64c183" />
-* **💾 Versatile Export Options**: Select and export your chats in multiple formats, including **Markdown, TXT, Word**, and **High-Res PDF**.
-* **🎨 Native UI Experience**: Integrates deeply with the native styling of various AI websites, with flawless support for Dark/Light mode automatic switching.
+* **💾 Versatile Export Options**: Select and export your chats in multiple formats, including **Markdown, TXT, Word**, and **High-Res PDF**.<img width="1280" height="800" alt="13" src="https://github.com/user-attachments/assets/fedcb54e-6f00-47aa-bf15-b4b74d490ae3" />
+* **🎨 Native UI Experience**: Integrates deeply with the native styling of various AI websites, with flawless support for Dark/Light mode automatic switching.<img width="1280" height="800" alt="14" src="https://github.com/user-attachments/assets/a342a98b-28bb-4ddb-b65e-73564ee01e02" />
+
 * **🔒 Absolute Privacy**: Your API keys and extracted chat data are processed **strictly on your local browser** and the AI provider you configure. Zero data is stored on our servers.
 
 ### 🌐 Supported Platforms

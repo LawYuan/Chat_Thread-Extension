@@ -18,11 +18,11 @@
 * 🐛 **丝滑交互优化**：彻底修复了页面滚动时侧边栏导航条目“高亮状态异常乱闪”的 Bug，阅读定位更加精准稳定。
 
 ### ✨ 核心功能亮点
-* **🗺️ 智能大纲导航**：自动提炼长对话脉络，点击侧边栏即可瞬间跳转至对应上下文，告别疯狂滚轮。
-* **💾 沉浸式极速导出**：支持将对话（支持多选批量）导出为 **Markdown、TXT、Word** 以及 **高清 PDF**。
+* **🗺️ 智能大纲导航**：自动提炼长对话脉络，点击侧边栏即可瞬间跳转至对应上下文，告别疯狂滚轮。<img width="1280" height="800" alt="1" src="https://github.com/user-attachments/assets/65ba7576-c385-4e3a-9676-5ea5b8670a56" />
+* **💾 沉浸式极速导出**：支持将对话（支持多选批量）导出为 **Markdown、TXT、Word** 以及 **高清 PDF**。<img width="1280" height="800" alt="3" src="https://github.com/user-attachments/assets/24d68402-7fe0-4a43-8e44-76d5205d6129" />
+
 * **🎨 原生级 UI 体验**：深度融入各家 AI 网站原生风格，完美支持深色/浅色主题（Dark Mode）自动无缝切换。
 * **🔒 绝对的数据主权**：您的 API Key 与所有对话提取数据**仅在本地浏览器和您指定的第三方模型间流转**，没有任何中心化服务器存储您的隐私。
-<img width="1280" height="800" alt="1" src="https://github.com/user-attachments/assets/c371629b-5999-49b2-8869-e6d62264c72d" />
 
 ### 🌐 支持的 AI 平台
 
@@ -41,7 +41,7 @@
 
 只需简单三步，即可开启高效导航体验：
 
-1. 📥 **获取插件**：前往 [Chrome 网上应用店](#) 安装“Chat脉络”扩展。（*链接待完全上架后补充*）
+1. 📥 **获取插件**：前往 [Chrome 网上应用店](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb) 安装“Chat脉络”扩展。
 2. ⚙️ **简单配置**：点击浏览器右上角的插件图标，填入您的免费 API Key（支持智谱 GLM 或 Google Gemini）。
 3. 🚀 **即刻使用**：打开任意支持的 AI 对话网页，聪明的侧边栏将自动为您工作！
 
@@ -53,11 +53,12 @@
 **ChatThread** is a powerful Chrome browser extension built for heavy AI users. It intelligently extracts the core intents of your lengthy AI conversations, generates a floating sidebar navigation, and allows you to export valuable chat logs into beautifully formatted local documents with a single click.
 
 ### 🚀 What's New in v3.0.1
-* 🖼️ **Enhanced PDF Export**: The PDF export engine now seamlessly parses and extracts images from your conversations, ensuring no visual information is lost.
+* 🖼️ **Enhanced PDF Export**: The PDF export engine now seamlessly parses and extracts images from your conversations, ensuring no visual information is lost.<img width="1280" height="800" alt="13" src="https://github.com/user-attachments/assets/fedcb54e-6f00-47aa-bf15-b4b74d490ae3" />
+
 * 🐛 **Smoother Interaction**: Fixed an annoying bug where sidebar navigation items would flicker erratically during scrolling. Tracking your reading position is now incredibly stable.
 
 ### ✨ Key Features
-* **🗺️ Smart Outline Navigation**: Automatically summarizes long chat threads. Click any item on the sidebar to instantly jump to the corresponding context.
+* **🗺️ Smart Outline Navigation**: Automatically summarizes long chat threads. Click any item on the sidebar to instantly jump to the corresponding context.<img width="1280" height="800" alt="11" src="https://github.com/user-attachments/assets/6edd586e-ec6a-4332-bf76-c4b5ab64c183" />
 * **💾 Versatile Export Options**: Select and export your chats in multiple formats, including **Markdown, TXT, Word**, and **High-Res PDF**.
 * **🎨 Native UI Experience**: Integrates deeply with the native styling of various AI websites, with flawless support for Dark/Light mode automatic switching.
 * **🔒 Absolute Privacy**: Your API keys and extracted chat data are processed **strictly on your local browser** and the AI provider you configure. Zero data is stored on our servers.
@@ -79,6 +80,6 @@ We offer flawless compatibility with major AI web interfaces:
 
 Get started in three simple steps:
 
-1. 📥 **Install**：Get ChatThread from the [Chrome Web Store](#). (*Link to be added*)
+1. 📥 **Install**：Get ChatThread from the [Chrome Web Store](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb).
 2. ⚙️ **Configure**：Click the extension icon and enter your free API Key (Zhipu GLM or Google Gemini).
 3. 🚀 **Use**：Open any supported AI chat page, and the smart sidebar will appear automatically!

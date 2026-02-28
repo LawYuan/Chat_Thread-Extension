@@ -1,7 +1,7 @@
 # 💬 Chat脉络 (ChatThread)
 
 [![Version](https://img.shields.io/badge/version-v3.0.1-blue.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Edge-lightgrey.svg)]()
+[![Platform](https://img.shields.io/badge/platform-Chrome-lightgrey.svg)]()
 [![Privacy](https://img.shields.io/badge/privacy-Local_Only-success.svg)]()
 
 > 🌐 Read this in other languages: [English](#english-version) | [简体中文](#简体中文版本)
@@ -10,7 +10,7 @@
 
 ## <a id="简体中文版本"></a> 🇨🇳 简体中文版本
 
-**Chat脉络 (ChatThread)** 是一款专为 AI 重度使用者打造的浏览器扩展。它能为您冗长的 AI 对话智能提取核心意图，自动生成悬浮侧边栏导航，并支持将珍贵的对话记录一键导出为图文并茂的本地文档。
+**Chat脉络 (ChatThread)** 是一款专为 AI 重度使用者打造的 Chrome 浏览器扩展。它能为您冗长的 AI 对话智能提取核心意图，自动生成悬浮侧边栏导航，并支持将珍贵的对话记录一键导出为图文并茂的本地文档。
 
 ### 🚀 最新更新 (v3.0.1)
 * 🖼️ **PDF 导出引擎升级**：导出 PDF 文档时，现已完美支持提取对话中的图片，解决了以往图文混排时丢失视觉信息的问题。
@@ -23,20 +23,31 @@
 * **🔒 绝对的数据主权**：您的 API Key 与所有对话提取数据**仅在本地浏览器和您指定的第三方模型间流转**，没有任何中心化服务器存储您的隐私。
 
 ### 🌐 支持的 AI 平台
-完美兼容几乎所有主流 AI 网页端，包括但不限于：
-`ChatGPT` `Claude` `Gemini` `DeepSeek` `Kimi` `豆包` `通义千问` `智谱清言` `文心一言` `Grok` `Perplexity` 等。
+
+我们完美兼容几乎所有主流 AI 网页端：
+
+| 平台名称 | 兼容状态 | 平台名称 | 兼容状态 |
+| :--- | :---: | :--- | :---: |
+| **ChatGPT** | ✅ 完美支持 | **通义千问** | ✅ 完美支持 |
+| **Claude** | ✅ 完美支持 | **智谱清言** | ✅ 完美支持 |
+| **Gemini** | ✅ 完美支持 | **文心一言** | ✅ 完美支持 |
+| **DeepSeek** | ✅ 完美支持 | **Grok** | ✅ 完美支持 |
+| **Kimi** | ✅ 完美支持 | **Perplexity** | ✅ 完美支持 |
+| **豆包** | ✅ 完美支持 | **更多平台** | 持续适配中... |
 
 ### 📦 安装与配置
-1. 前往 [Chrome 网上应用店](#) 或 [Edge 扩展商店](#) 搜索“Chat脉络”并安装。（*链接待上架后补充*）
-2. 点击浏览器右上角的插件图标，打开设置面板。
-3. 填入您获取的免费 API Key（支持智谱 GLM / Google Gemini）。
-4. 打开任意受支持的 AI 对话网页，右侧导航栏将自动浮现！
+
+只需简单三步，即可开启高效导航体验：
+
+1. 📥 **获取插件**：前往 [Chrome 网上应用店](#) 安装“Chat脉络”扩展。（*链接待完全上架后补充*）
+2. ⚙️ **简单配置**：点击浏览器右上角的插件图标，填入您的免费 API Key（支持智谱 GLM 或 Google Gemini）。
+3. 🚀 **即刻使用**：打开任意支持的 AI 对话网页，聪明的侧边栏将自动为您工作！
 
 ---
 
 ## <a id="english-version"></a> 🇬🇧 English Version
 
-**ChatThread** is a powerful browser extension built for heavy AI users. It intelligently extracts the core intents of your lengthy AI conversations, generates a floating sidebar navigation, and allows you to export valuable chat logs into beautifully formatted local documents with a single click.
+**ChatThread** is a powerful Chrome browser extension built for heavy AI users. It intelligently extracts the core intents of your lengthy AI conversations, generates a floating sidebar navigation, and allows you to export valuable chat logs into beautifully formatted local documents with a single click.
 
 ### 🚀 What's New in v3.0.1
 * 🖼️ **Enhanced PDF Export**: The PDF export engine now seamlessly parses and extracts images from your conversations, ensuring no visual information is lost.
@@ -49,11 +60,22 @@
 * **🔒 Absolute Privacy**: Your API keys and extracted chat data are processed **strictly on your local browser** and the AI provider you configure. Zero data is stored on our servers.
 
 ### 🌐 Supported Platforms
-Flawlessly compatible with major AI web interfaces, including:
-`ChatGPT`, `Claude`, `Gemini`, `DeepSeek`, `Kimi`, `Doubao`, `Qwen`, `GLM`, `Ernie Bot`, `Grok`, `Perplexity`, and more.
+
+We offer flawless compatibility with major AI web interfaces:
+
+| Platform | Status | Platform | Status |
+| :--- | :---: | :--- | :---: |
+| **ChatGPT** | ✅ Supported | **Qwen** | ✅ Supported |
+| **Claude** | ✅ Supported | **GLM** | ✅ Supported |
+| **Gemini** | ✅ Supported | **Ernie Bot** | ✅ Supported |
+| **DeepSeek** | ✅ Supported | **Grok** | ✅ Supported |
+| **Kimi** | ✅ Supported | **Perplexity** | ✅ Supported |
+| **Doubao** | ✅ Supported | **More...** | Constantly adding |
 
 ### 📦 Installation & Setup
-1. Visit the [Chrome Web Store](#) or [Edge Add-ons](#) to install ChatThread. (*Links to be added soon*)
-2. Click the extension icon in your browser to open the settings panel.
-3. Enter your free API Key (Zhipu GLM or Google Gemini supported).
-4. Open any supported AI chat webpage, and your smart sidebar will automatically appear!
+
+Get started in three simple steps:
+
+1. 📥 **Install**：Get ChatThread from the [Chrome Web Store](#). (*Link to be added*)
+2. ⚙️ **Configure**：Click the extension icon and enter your free API Key (Zhipu GLM or Google Gemini).
+3. 🚀 **Use**：Open any supported AI chat page, and the smart sidebar will appear automatically!

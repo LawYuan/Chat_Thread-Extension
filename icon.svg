@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1B26"/>
+      <stop offset="100%" stop-color="#0F0F15"/>
+    </linearGradient>
+    <linearGradient id="activeBrand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3378FF"/>
+      <stop offset="100%" stop-color="#9448FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="128" height="128" rx="32" fill="url(#bg)"/>
+
+  <rect x="34" y="24" width="8" height="80" rx="4" fill="#2D2E3A"/>
+
+  <circle cx="38" cy="36" r="10" fill="#2D2E3A"/>
+  <rect x="58" y="30" width="40" height="12" rx="6" fill="#2D2E3A"/>
+
+  <rect x="58" y="58" width="48" height="12" rx="6" fill="url(#activeBrand)"/>
+  <circle cx="38" cy="64" r="14" fill="url(#activeBrand)"/>
+  <path d="M 38 54 C 38 60 32 64 32 64 C 32 64 38 68 38 74 C 38 68 44 64 44 64 C 44 64 38 60 38 54 Z" fill="#FFFFFF"/>
+
+  <circle cx="38" cy="92" r="10" fill="#2D2E3A"/>
+  <rect x="58" y="86" width="28" height="12" rx="6" fill="#2D2E3A"/>
+</svg>

@@ -8,6 +8,14 @@
 
 ---
 
+### 📦 安装与配置
+
+只需简单三步，即可开启高效导航体验：
+
+1. 📥 **获取插件**：前往 [Chrome 网上应用店](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb) 安装“Chat脉络”扩展。
+2. ⚙️ **简单配置**：点击浏览器右上角的插件图标，填入您的免费 API Key（支持智谱 GLM 或 Google Gemini）。
+3. 🚀 **即刻使用**：打开任意支持的 AI 对话网页，聪明的侧边栏将自动为您工作！
+
 ## <a id="简体中文版本"></a> 简体中文版本
 <img width="1400" height="560" alt="宣传图2" src="https://github.com/user-attachments/assets/e74ca31d-a59e-4a39-a925-a1f2f3302bee" />
 
@@ -38,15 +46,14 @@
 | **Kimi** | ✅ 完美支持 | **Perplexity** | ✅ 完美支持 |
 | **豆包** | ✅ 完美支持 | **更多平台** | 持续适配中... |
 
-### 📦 安装与配置
-
-只需简单三步，即可开启高效导航体验：
-
-1. 📥 **获取插件**：前往 [Chrome 网上应用店](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb) 安装“Chat脉络”扩展。
-2. ⚙️ **简单配置**：点击浏览器右上角的插件图标，填入您的免费 API Key（支持智谱 GLM 或 Google Gemini）。
-3. 🚀 **即刻使用**：打开任意支持的 AI 对话网页，聪明的侧边栏将自动为您工作！
-
 ---
+### 📦 Installation & Setup
+
+Get started in three simple steps:
+
+1. 📥 **Install**：Get ChatThread from the [Chrome Web Store](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb).
+2. ⚙️ **Configure**：Click the extension icon and enter your free API Key (Zhipu GLM or Google Gemini).
+3. 🚀 **Use**：Open any supported AI chat page, and the smart sidebar will appear automatically!
 
 ## <a id="english-version"></a> English Version
 <img width="1400" height="560" alt="宣传图22" src="https://github.com/user-attachments/assets/02859534-fd39-4f31-b359-a140134dd0fb" />
@@ -77,11 +84,3 @@ We offer flawless compatibility with major AI web interfaces:
 | **DeepSeek** | ✅ Supported | **Grok** | ✅ Supported |
 | **Kimi** | ✅ Supported | **Perplexity** | ✅ Supported |
 | **Doubao** | ✅ Supported | **More...** | Constantly adding |
-
-### 📦 Installation & Setup
-
-Get started in three simple steps:
-
-1. 📥 **Install**：Get ChatThread from the [Chrome Web Store](https://chromewebstore.google.com/detail/chat%E8%84%89%E7%BB%9C-ai%E5%AF%B9%E8%AF%9D%E5%AF%BC%E8%88%AA/cfehhfmlimnnjmfeoddepdbgbegheihb).
-2. ⚙️ **Configure**：Click the extension icon and enter your free API Key (Zhipu GLM or Google Gemini).
-3. 🚀 **Use**：Open any supported AI chat page, and the smart sidebar will appear automatically!

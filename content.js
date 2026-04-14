@@ -6,15 +6,21 @@
 
   const t = {
     emptyStateText: isZh ? '当前无对话，等待开始...' : 'Waiting for conversation to start...',
-    headerSuffix: isZh ? ' 脉络' : ' Thread',
+    headerSuffix: isZh ? '时间线' : 'Timeline',
     searchPlaceholder: isZh ? '输入关键字过滤...' : 'Filter threads...',
     moveTitle: isZh ? '拖动调整位置' : 'Drag to move',
     resizeTitle: isZh ? '拖动调整大小，双击自适应' : 'Drag to resize, double-click to auto-fit',
     searchBtnTitle: isZh ? '搜索/过滤对话' : 'Search / Filter',
     exportBtnTitle: isZh ? '批量导出' : 'Export',
     toggleBtnTitle: isZh ? '展开/收起' : 'Expand / Collapse',
+    expandTitle: isZh ? '展开' : 'Expand',
+    collapseTitle: isZh ? '最小化' : 'Minimize',
     starBtnTitle: isZh ? '点击星标/取消置顶' : 'Star / Unstar',
+    renameTitle: isZh ? '编辑' : 'Edit',
+    exportItemTitle: isZh ? '导出当前' : 'Export Item',
+    moreItemTitle: isZh ? '更多' : 'More',
     analyzing: isZh ? '正在提炼...' : 'Analyzing...',
+    moreBtnTitle: isZh ? '更多' : 'More',
     extractFailed: isZh ? '❌ 提取失败' : '❌ Failed',
     savedPrefix: isZh ? '已收录: ' : 'Saved: ',
     selectAll: isZh ? '全选' : 'Select All',
@@ -25,9 +31,9 @@
     formatTXT: isZh ? '导出为 纯文本 (TXT)' : 'Export as Text',
     formatPDF: isZh ? '导出为 高清 PDF' : 'Export as PDF',
     formatWord: isZh ? '导出为 Word 文档' : 'Export as Word',
-    obTitle: isZh ? '欢迎使用 Chat脉络' : 'Welcome to ChatThread',
+    obTitle: isZh ? '欢迎使用 AI时间线' : 'Welcome to AI Timeline',
     obStep1: isZh ? '1. 点击右上角<b>扩展程序</b>' : '1. Click Extensions',
-    obStep2: isZh ? '2. 找到 <b>Chat脉络</b> 并打开设置' : '2. Open Settings',
+    obStep2: isZh ? '2. 找到 <b>AI时间线</b> 并打开设置' : '2. Open AI Timeline settings',
     obStep3: isZh ? '3. 获取并填入免费 <b>API Key</b>' : '3. Enter API Key',
     obStep4: isZh ? '4. 保存后即刻 <b>自动启动</b>' : '4. Save to start',
     ghostToast: isZh ? '该记录较早，请向上滚动加载' : 'Scroll up to load'
@@ -51,6 +57,7 @@
     if (host.includes('tiangong.cn')) return { nameZh: '天工', nameEn: 'Tiangong', color: '#5C45FF', bg: '#F2F0FF' };
     if (host.includes('manus.im')) return { nameZh: 'Manus', nameEn: 'Manus', color: '#333333', bg: '#F4F5F7' };
     if (host.includes('perplexity.ai')) return { nameZh: 'Perplexity', nameEn: 'Perplexity', color: '#247c84', bg: '#eaf1f2' };
+    if (host.includes('minimax.com') || host.includes('hailuoai.com') || host.includes('hailu.minimax.com')) return { nameZh: 'MiniMax', nameEn: 'MiniMax', color: '#B4393C', bg: '#f8eaeb' };
     return { nameZh: 'AI', nameEn: 'AI', color: '#0b57d0', bg: '#e8f0fe' };
   }
 
@@ -75,13 +82,15 @@
     selectedExportIds: new Set(),
     isFormatMenuOpen: false,
     hasValidKey: false,
-    emptyStateTimeout: null
+    emptyStateTimeout: null,
+    customTitles: new Map()
   };
 
-  chrome.storage.local.get(['acnGlobalCache', 'acnStarredItems', 'acnStarredDetails', 'apiEngine', 'zhipuKey', 'geminiKey'], (res) => {
+  chrome.storage.local.get(['acnGlobalCache', 'acnStarredItems', 'acnStarredDetails', 'apiEngine', 'zhipuKey', 'geminiKey', 'acnCustomTitles'], (res) => {
     if (res.acnGlobalCache) { try { AppState.summaryCache = new Map(JSON.parse(res.acnGlobalCache)); } catch (e) { } }
     if (res.acnStarredItems) { try { AppState.starredItems = new Set(JSON.parse(res.acnStarredItems)); } catch (e) { } }
     if (res.acnStarredDetails) { try { AppState.starredDetails = new Map(JSON.parse(res.acnStarredDetails)); } catch (e) { } }
+    if (res.acnCustomTitles) { try { AppState.customTitles = new Map(JSON.parse(res.acnCustomTitles)); } catch (e) { } }
 
     const engine = res.apiEngine || (isZh ? 'zhipu' : 'gemini');
     AppState.hasValidKey = engine === 'zhipu' ? !!res.zhipuKey : !!res.geminiKey;
@@ -108,6 +117,10 @@
     });
   }
 
+  function saveCustomTitlesToLocal() {
+    chrome.storage.local.set({ acnCustomTitles: JSON.stringify(Array.from(AppState.customTitles.entries())) });
+  }
+
   let toastTimeout;
   function showToast(msg) {
     const toast = document.getElementById('ai-chat-nav-toast');
@@ -129,25 +142,32 @@
 
     nav.innerHTML = `
     <div id="ai-chat-nav-top-resize-handle" title="${t.resizeTitle}"></div>
-    <div id="ai-chat-nav-header" title="${t.moveTitle}">
+    <div id="ai-chat-nav-header">
       <div class="header-controls-left">
         <div class="header-btn header-search-btn" title="${t.searchBtnTitle}">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </div>
       </div>
       <input type="text" id="ai-chat-nav-search-input" placeholder="${t.searchPlaceholder}" autocomplete="off"/>
-      <div class="header-title-text">${currentSiteName}${t.headerSuffix}</div>
+      <div class="header-title-text" title="${t.moveTitle}">${t.headerSuffix}</div>
       <div class="header-controls-right">
-        <div class="header-btn header-export-btn" title="${t.exportBtnTitle}">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        </div>
-        <div class="header-btn header-toggle-icon" title="${t.toggleBtnTitle}">
+        <div class="header-btn header-toggle-icon" title="${t.collapseTitle}">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
         </div>
       </div>
     </div>
     <div id="ai-chat-nav-peek"></div>
     <div id="ai-chat-nav-toast" class="nav-toast"></div>
+    <div id="ai-chat-nav-item-menu" class="item-more-menu">
+        <div class="more-menu-item action-item-rename">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span>${t.renameTitle}</span>
+        </div>
+        <div class="more-menu-item action-item-export">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>${t.exportAction}</span>
+        </div>
+    </div>
       
     <div id="ai-chat-nav-onboarding">
         <div class="onboarding-icon">
@@ -185,6 +205,8 @@
       <div id="ai-chat-nav-resize-handle" title="${t.resizeTitle}"><div class="resize-bar-pill"></div></div>
     `;
     document.body.appendChild(nav);
+    // === 创建后立即同步深色主题，避免刷新时闪烁浅色 ===
+    syncTheme();
     // === 新增：将气泡雷达容器挂载到页面 ===
     if (!document.getElementById('ai-chat-nav-global-tooltip')) {
       const tooltip = document.createElement('div');
@@ -195,11 +217,11 @@
   }
 
   // === 共用：向上查找 AI 回答节点 ===
-  const AI_SELECTORS = ['.markdown-body', '.prose', '[data-message-author-role="assistant"]', '.msg-content-container', '[class*="assistant" i]', '.message-bubble', '[class*="model-response"]', '.result-streaming'];
+  const AI_SELECTORS = ['.markdown-body', '.prose', '[data-message-author-role="assistant"]', '.msg-content-container', '[class*="assistant" i]', '.message-bubble', '[class*="model-response"]', '.result-streaming', '[data-testid*="bot" i]', '[class*="bot" i][class*="message" i]', '.ai-message'];
 
   function findAINode(userEl) {
     let current = userEl, aiNode = null, attempts = 0;
-    while (current && current !== document.body && attempts < 8) {
+    while (current && current !== document.body && attempts < 15) {
       let sibling = current.nextElementSibling;
       while (sibling) {
         if (sibling.innerText && sibling.innerText.trim().length > 0) { aiNode = sibling; break; }
@@ -263,63 +285,154 @@
 
     return clone.innerHTML;
   }
-  // === 新增：纯本地无延迟提纲提取引擎 ===
+  // === 新增：纯本地无延迟提纲提取引擎 (智能识别：提纲模式 vs 故事模式) ===
   function extractOutlineLocally(userEl) {
     const aiNode = findAINode(userEl);
-    if (!aiNode) return "*(正在生成或未找到回答)*";
+    if (!aiNode) return "*(正在生成回答...)*";
 
-    const clone = aiNode.cloneNode(true);
+    const targetNode = findAITarget(aiNode) || aiNode;
+    const clone = targetNode.cloneNode(true);
+    // 预清理：移除代码块、SVG、隐藏元素，避免干扰
     clone.querySelectorAll('pre, code, svg, [style*="display: none"]').forEach(el => el.remove());
 
-    const outlinePoints = []; const maxPoints = 4;
+    const structuralPoints = [];
+    const maxPoints = 4;
 
-    // 策略 1：标题
+    // 1. 抓取所有潜在的结构化点 (标题、加粗列表项、数字编号行)
+    // 优先：H2~H4 标题
     const headings = clone.querySelectorAll('h2, h3, h4');
     for (const h of headings) {
-      const text = h.innerText.trim();
-      if (text && outlinePoints.length < maxPoints) outlinePoints.push("🔹 " + text);
+      const text = h.innerText.replace(/^[#\s]+/, '').trim();
+      if (text && structuralPoints.length < maxPoints) structuralPoints.push("🔹 " + text);
     }
-    if (outlinePoints.length > 0) return outlinePoints.join('\n');
 
-    // 策略 2：加粗列表项
-    for (const li of clone.querySelectorAll('li')) {
-      const boldEl = li.querySelector('strong');
-      if (boldEl && li.innerText.trim().startsWith(boldEl.innerText.trim()) && outlinePoints.length < maxPoints) {
-        outlinePoints.push("🔸 " + boldEl.innerText.replace(/[:：]$/, '').trim());
+    // 补充：加粗开头的列表项 (如果标题还不够的话)
+    if (structuralPoints.length < maxPoints) {
+      for (const li of clone.querySelectorAll('li')) {
+        const boldEl = li.querySelector('strong');
+        if (boldEl && li.innerText.trim().startsWith(boldEl.innerText.trim()) && structuralPoints.length < maxPoints) {
+          const text = boldEl.innerText.replace(/[:：]$/, '').trim();
+          if (text && !structuralPoints.some(p => p.includes(text))) {
+            structuralPoints.push("🔸 " + text);
+          }
+        }
       }
     }
-    if (outlinePoints.length > 0) return outlinePoints.join('\n');
 
-    // 策略 3：正则匹配编号
-    const pointRegex = /^(\d+\.|[一二三四五六七八九十]+、|\-|\*)\s*(.*)/;
-    for (const line of clone.innerText.split('\n')) {
-      const match = line.trim().match(pointRegex);
-      if (match && match[2].length > 2 && outlinePoints.length < maxPoints) {
-        const shortText = match[2].substring(0, 30);
-        outlinePoints.push("▪️ " + shortText + (match[2].length > 30 ? "..." : ""));
+    // 补充：正则匹配行首编号 (如果还没到 maxPoints)
+    if (structuralPoints.length < maxPoints) {
+      const pointRegex = /^(\d+\.|[一二三四五六七八九十]+、|\-|\*)\s*(.*)/;
+      const lines = clone.innerText.split('\n');
+      for (const line of lines) {
+        const match = line.trim().match(pointRegex);
+        if (match && match[2].length > 2 && structuralPoints.length < maxPoints) {
+          const text = match[2].substring(0, 30).trim();
+          if (text && !structuralPoints.some(p => p.includes(text))) {
+            structuralPoints.push("▪️ " + text + (match[2].length > 30 ? "..." : ""));
+          }
+        }
       }
     }
-    if (outlinePoints.length > 0) return outlinePoints.join('\n');
 
-    // 策略 4：兜底截断
-    let plainText = clone.innerText.replace(/[\r\n]+/g, ' ').trim();
+    // 2. 智能判断：
+    // 如果提取到的结构化点 >= 1，说明存在标题或条理，采用提纲模式
+    if (structuralPoints.length >= 1) {
+      return structuralPoints.join('\n');
+    }
+
+    // 3. 故事模式 (Fallback)：如果结构化点几乎没有，说明是“讲故事”或大段文本，直接复制开头
+    // 增加长度到 120 字左右，并尝试在句号处优雅截断
+    let plainText = clone.innerText.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
     if (plainText.length === 0) return "📦 包含代码片段或特殊格式";
-    return plainText.length > 60 ? plainText.substring(0, 60) + "..." : plainText;
+
+    const limit = 120;
+    if (plainText.length <= limit) return plainText;
+
+    // 尝试在最后一个标点处截断
+    let slice = plainText.substring(0, limit);
+    const lastPunct = Math.max(slice.lastIndexOf('。'), slice.lastIndexOf('.'), slice.lastIndexOf('！'), slice.lastIndexOf('!'), slice.lastIndexOf('？'), slice.lastIndexOf('?'));
+    if (lastPunct > limit * 0.6) {
+      return slice.substring(0, lastPunct + 1);
+    }
+    return slice + "...";
   }
 
   function bindUIEvents(nav) {
     const header = document.getElementById('ai-chat-nav-header');
     const searchBtn = nav.querySelector('.header-search-btn');
-    const exportBtn = nav.querySelector('.header-export-btn');
     const searchInput = document.getElementById('ai-chat-nav-search-input');
     const toggleIcon = nav.querySelector('.header-toggle-icon');
     const resizeHandle = document.getElementById('ai-chat-nav-resize-handle');
     const topResizeHandle = document.getElementById('ai-chat-nav-top-resize-handle');
     const actionBar = document.getElementById('ai-chat-nav-action-bar');
     const formatMenu = document.getElementById('ai-chat-nav-format-menu');
+    const itemMenu = document.getElementById('ai-chat-nav-item-menu');
     const btnSelectAll = actionBar.querySelector('.action-select-all');
     const btnExit = actionBar.querySelector('.action-cancel');
     const btnConfirm = actionBar.querySelector('.action-confirm');
+
+    document.addEventListener('click', (e) => {
+      if (itemMenu.classList.contains('show')) {
+        const isClickInside = itemMenu.contains(e.target) || e.target.closest('.item-more-btn');
+        if (!isClickInside) { itemMenu.classList.remove('show'); }
+      }
+    });
+
+    itemMenu.querySelector('.action-item-export').addEventListener('click', (e) => {
+      e.stopPropagation(); itemMenu.classList.remove('show');
+      if (AppState.navMappings.length === 0 || !AppState.hasValidKey) return;
+      if (!AppState.isExportMode) {
+        if (nav.classList.contains('nav-collapsed')) toggleNav('expand');
+        if (header.classList.contains('search-active')) {
+          header.classList.remove('search-active'); searchInput.value = '';
+          AppState.currentSearchTerm = ''; applySearchFilter(); searchInput.blur();
+        }
+        AppState.isExportMode = true; nav.classList.add('export-mode'); updateExportConfirmBtn();
+      }
+    });
+
+    itemMenu.querySelector('.action-item-rename').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const starKey = itemMenu.dataset.activeStarKey;
+      itemMenu.classList.remove('show');
+      if (!starKey) return;
+
+      const mapping = AppState.navMappings.find(m => m.starKey === starKey);
+      if (!mapping) return;
+
+      const textEl = mapping.navEl.querySelector('.item-text-content');
+      const originalTitle = textEl.innerText;
+
+      const input = document.createElement('input');
+      input.className = 'item-rename-input';
+      input.placeholder = originalTitle;
+      input.value = ''; // Empty for "overwrite" feel
+
+      textEl.innerHTML = '';
+      textEl.appendChild(input);
+      input.focus();
+      input.setSelectionRange(0, 0);
+
+      const finishRename = () => {
+        const newVal = input.value.trim();
+        const finalTitle = newVal || originalTitle;
+        if (newVal) {
+          AppState.customTitles.set(starKey, finalTitle);
+          saveCustomTitlesToLocal();
+        }
+        textEl.innerText = finalTitle;
+        if (AppState.starredItems.has(starKey)) {
+          const details = AppState.starredDetails.get(starKey);
+          if (details) { details.title = finalTitle; saveStarsToLocal(); }
+        }
+      };
+
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') { ev.preventDefault(); finishRename(); }
+        if (ev.key === 'Escape') { ev.preventDefault(); textEl.innerText = originalTitle; }
+      });
+      input.addEventListener('blur', finishRename);
+    });
 
     function updateSelectAllBtnState() {
       const visibleMappings = AppState.navMappings.filter(m => m.navEl.style.display !== 'none');
@@ -336,31 +449,8 @@
       AppState.isExportMode = false; AppState.isFormatMenuOpen = false; AppState.selectedExportIds.clear();
       nav.classList.remove('export-mode'); formatMenu.classList.remove('show');
       AppState.navMappings.forEach(m => m.navEl.classList.remove('is-selected'));
+      updateExportConfirmBtn();
     }
-
-    function updateExportConfirmBtn() {
-      const count = AppState.selectedExportIds.size;
-      if (count > 0) {
-        btnConfirm.innerText = `${t.exportAction} (${count})`; btnConfirm.classList.remove('disabled');
-      } else {
-        btnConfirm.innerText = t.exportAction; btnConfirm.classList.add('disabled');
-        if (AppState.isFormatMenuOpen) { formatMenu.classList.remove('show'); AppState.isFormatMenuOpen = false; }
-      }
-      updateSelectAllBtnState();
-    }
-
-    exportBtn.addEventListener('mousedown', (e) => {
-      e.stopPropagation();
-      if (AppState.navMappings.length === 0 || !AppState.hasValidKey) return;
-      if (AppState.isExportMode) { exitExportMode(); } else {
-        if (nav.classList.contains('nav-collapsed')) toggleNav('expand');
-        if (header.classList.contains('search-active')) {
-          header.classList.remove('search-active'); searchInput.value = '';
-          AppState.currentSearchTerm = ''; applySearchFilter(); searchInput.blur();
-        }
-        AppState.isExportMode = true; nav.classList.add('export-mode'); updateExportConfirmBtn();
-      }
-    });
 
     btnExit.addEventListener('click', exitExportMode);
 
@@ -403,7 +493,7 @@
         btn.style.pointerEvents = 'auto';
 
         const timestamp = Date.now();
-        const filename = `ChatThread_${currentSiteName}_${timestamp}`;
+      const filename = `AI_Timeline_${currentSiteName}_${timestamp}`;
 
         if (format === 'md') {
           let mdContent = `# 💬 AI Chat Log (${currentSiteName})\n\n*Exported on: ${new Date().toLocaleString()}*\n\n---\n\n`;
@@ -416,7 +506,7 @@
         } else if (format === 'word') {
           // 新增：纯前端 Word (.doc) 导出引擎，完美兼容图片和排版
           let wordContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-              <head><meta charset='utf-8'><title>Chat Thread Export</title>
+<head><meta charset='utf-8'><title>AI Timeline Export</title>
               <style>
                 body { font-family: "Microsoft YaHei", "Segoe UI", sans-serif; line-height: 1.6; color: #333; }
                 h1 { color: ${siteConfig.color}; border-bottom: 2px solid #eee; padding-bottom: 10pt; font-size: 18pt; }
@@ -452,7 +542,7 @@
           iframe.style.position = 'fixed'; iframe.style.left = '200vw'; iframe.style.top = '0'; iframe.style.width = '800px'; iframe.style.height = '100vh'; iframe.style.border = 'none';
           document.body.appendChild(iframe);
           const doc = iframe.contentWindow.document;
-          doc.write('<html><head><title>Chat Thread Export</title><style>');
+      doc.write('<html><head><title>AI Timeline Export</title><style>');
           doc.write('body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }');
           doc.write(`h1 { color: ${siteConfig.color}; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 24px; }`);
           doc.write('.qa-block { margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; page-break-inside: avoid; background: #fff; }');
@@ -504,15 +594,69 @@
       const isCollapsed = nav.classList.contains('nav-collapsed');
       if (forceState === 'collapse' && isCollapsed) return;
       if (forceState === 'expand' && !isCollapsed) return;
-      nav.classList.add('animating-height'); nav.classList.remove('peek-active');
+
+      nav.classList.add('animating-height');
+      nav.classList.remove('peek-active');
+
       if (!isCollapsed && AppState.isExportMode) exitExportMode();
+
       if (!isCollapsed) {
-        AppState.savedHeight = nav.style.height || 'auto'; nav.style.height = nav.offsetHeight + 'px'; void nav.offsetHeight;
-        nav.classList.add('nav-collapsed'); nav.style.height = '44px';
+        // Collapsing
+        AppState.savedHeight = nav.style.height || 'auto';
+        nav.style.height = nav.offsetHeight + 'px';
+        void nav.offsetHeight;
+
+        nav.classList.add('nav-collapsed');
+        nav.style.height = '44px';
+        nav.style.width = '44px';
+        nav.title = t.expandTitle;
+        toggleIcon.title = t.expandTitle;
       } else {
-        nav.classList.remove('nav-collapsed'); const currentPx = nav.offsetHeight; nav.style.height = AppState.savedHeight === 'auto' ? 'auto' : AppState.savedHeight;
-        const targetPx = nav.offsetHeight; nav.style.height = currentPx + 'px'; void nav.offsetHeight; nav.style.height = targetPx + 'px';
-        setTimeout(() => { if (!nav.classList.contains('nav-collapsed')) nav.style.height = AppState.savedHeight; }, 360);
+        // Expanding
+        // Step 1: Suppress header content BEFORE removing the class
+        // This prevents the title from flashing in during the transitionless measurement phase
+        header.style.transition = 'none';
+        const hiddenEls = header.querySelectorAll('.header-title-text, .header-controls-left');
+        hiddenEls.forEach(el => { el.style.transition = 'none'; el.style.opacity = '0'; });
+
+        nav.style.transition = 'none';
+        nav.classList.remove('nav-collapsed');
+
+        // Measure targeted state height
+        nav.style.width = '240px';
+        nav.style.height = 'auto';
+        const targetPx = nav.offsetHeight;
+
+        // Reset to initial
+        nav.style.width = '44px';
+        nav.style.height = '44px';
+        void nav.offsetHeight; // force reflow
+
+        // Step 2: Re-enable transitions and kick off the animation
+        nav.style.transition = '';
+        header.style.transition = '';
+        nav.style.width = '';
+        nav.style.height = targetPx + 'px';
+
+        // Step 3: Fade-in the header content AFTER the animation has started
+        // Use a very short delay to ensure the width transition is already running
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            hiddenEls.forEach(el => {
+              el.style.transition = '';
+              el.style.opacity = '';
+            });
+          });
+        });
+
+        setTimeout(() => {
+          if (!nav.classList.contains('nav-collapsed')) {
+            nav.style.height = AppState.savedHeight === 'auto' ? 'auto' : AppState.savedHeight;
+          }
+        }, 360);
+
+        nav.title = '';
+        toggleIcon.title = t.collapseTitle;
       }
       setTimeout(() => nav.classList.remove('animating-height'), 360);
     }
@@ -541,13 +685,21 @@
       }
     });
 
-    toggleIcon.addEventListener('click', (e) => { e.stopPropagation(); AppState.isSearchAutoExpanded = false; toggleNav(); });
+    let hasDragged = false;
+    toggleIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (hasDragged) return; // Ignore click if we were dragging via the toggle icon
+      AppState.isSearchAutoExpanded = false; toggleNav();
+    });
     searchInput.addEventListener('mousedown', (e) => e.stopPropagation()); searchInput.addEventListener('keydown', (e) => e.stopPropagation());
 
     let isDraggingContainer = false, isResizing = false, isTopResizing = false, startY, startTop, startHeight;
     header.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.header-btn') || e.target.closest('#ai-chat-nav-search-input')) return;
-      isDraggingContainer = true; startY = e.clientY; startTop = parseInt(window.getComputedStyle(nav).top, 10) || 100; document.body.style.userSelect = 'none';
+      // In expanded state, avoid dragging if clicking buttons or input. In collapsed, the whole ball is draggable.
+      if (!nav.classList.contains('nav-collapsed')) {
+        if (e.target.closest('.header-btn') || e.target.closest('#ai-chat-nav-search-input')) return;
+      }
+      isDraggingContainer = true; hasDragged = false; startY = e.clientY; startTop = parseInt(window.getComputedStyle(nav).top, 10) || 100; document.body.style.userSelect = 'none';
     });
     resizeHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); isResizing = true; startY = e.clientY; startHeight = nav.offsetHeight; document.body.style.userSelect = 'none'; nav.style.transition = 'none'; });
     resizeHandle.addEventListener('dblclick', (e) => { e.stopPropagation(); nav.style.height = 'auto'; AppState.savedHeight = 'auto'; });
@@ -555,7 +707,10 @@
     topResizeHandle.addEventListener('dblclick', (e) => { e.stopPropagation(); nav.style.height = 'auto'; AppState.savedHeight = 'auto'; });
 
     document.addEventListener('mousemove', (e) => {
-      if (isDraggingContainer) { let newTop = startTop + (e.clientY - startY); const maxTop = window.innerHeight - nav.offsetHeight; nav.style.top = Math.max(SAFE_TOP_MARGIN, Math.min(newTop, maxTop)) + 'px'; }
+      if (isDraggingContainer) {
+        if (Math.abs(e.clientY - startY) > 3) hasDragged = true;
+        let newTop = startTop + (e.clientY - startY); const maxTop = window.innerHeight - nav.offsetHeight; nav.style.top = Math.max(SAFE_TOP_MARGIN, Math.min(newTop, maxTop)) + 'px';
+      }
       if (isResizing) { let newHeight = startHeight + (e.clientY - startY); const maxAllowed = window.innerHeight - nav.getBoundingClientRect().top; nav.style.height = Math.max(80, Math.min(newHeight, maxAllowed)) + 'px'; }
       if (isTopResizing) {
         let dy = e.clientY - startY; let newTop = startTop + dy; let newHeight = startHeight - dy;
@@ -565,11 +720,13 @@
       }
     });
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', (e) => {
       if (isDraggingContainer || isResizing || isTopResizing) {
         if (isResizing || isTopResizing) AppState.savedHeight = nav.style.height;
         isDraggingContainer = isResizing = isTopResizing = false;
         document.body.style.userSelect = '';
+        // keep hasDragged true briefly so the native click listener can intercept it
+        setTimeout(() => { hasDragged = false; }, 50);
       }
     });
     // === 新增：完美复原气泡雷达交互系统 ===
@@ -579,7 +736,11 @@
     nav.addEventListener('mouseover', (e) => {
       const item = e.target.closest('.ai-chat-nav-item');
       if (item && !AppState.isExportMode) {
-        const outlineText = item.dataset.outline;
+        const refId = item.dataset.refId;
+        const mapping = AppState.navMappings.find(m => m.navEl.dataset.refId === refId);
+        if (!mapping || !mapping.msgEl) return;
+
+        const outlineText = extractOutlineLocally(mapping.msgEl);
         if (!outlineText || outlineText === "undefined" || outlineText.trim() === "") return;
 
         globalTooltip.innerText = outlineText;
@@ -643,14 +804,59 @@
       document.getElementById('ai-chat-nav-onboarding').style.display = 'none';
     }
 
-    const selectors = [
-      '.query-content', '[data-message-author-role="user"]', '.font-user-message', '[data-testid="message-row-user"]', '[data-testid*="user-message" i]', '.ds-chat-message--user', '.ds-markdown--user', 'div[class*="fbb737a4"]', 'div[style*="flex-direction: row-reverse"] > div', '[data-role="user" i]', '[data-author-role="user" i]', '[data-author="user" i]', '[data-type="user" i]', 'div[class*="user" i][class*="message" i]', 'div[class*="user" i][class*="msg" i]', 'div[class*="user" i][class*="content" i]', 'div[class*="chat" i][class*="user" i]', '.agent-chat__bubble--human', '[data-testid="send_message"]', '.message-bubble', '.msg-content-container', '[class*="group/query"]', '[class*="questionItem"]', '[class*="roleUser"]', '[data-testid*="user" i]', '[class*="UserPrompt" i]', '[class*="user-prompt" i]', '[class*="UserBubble" i]', '[class*="user-bubble" i]', 'div[class*="bg-offsetPlus" i] .break-words', 'div.break-words.whitespace-pre-wrap'
-    ];
+    // === 站点专属选择器：避免在特定平台上误选 AI 回答节点 ===
+    const host = window.location.hostname;
+    const isGrok = host.includes('grok.com') || (host.includes('x.com') && window.location.pathname.includes('/i/grok'));
+
+    let selectors;
+    if (isGrok) {
+      // Grok 专用选择器：通过浏览器实际 DOM 检测确认
+      // 用户消息的父容器含 items-end（右对齐），AI 回答父容器含 items-start（左对齐）
+      selectors = [
+        'div[class*="items-end"] .message-bubble',
+        'div[class*="items-end"] [data-testid="message-bubble"]',
+      ];
+    } else {
+      selectors = [
+        '.query-content', '[data-message-author-role="user"]', '.font-user-message', '[data-testid="message-row-user"]', '[data-testid*="user-message"]', '.ds-chat-message--user', '.ds-markdown--user', 'div[class*="fbb737a4"]', 'div[style*="flex-direction: row-reverse"] > div', '[data-role="user" i]', '[data-author-role="user" i]', '[data-author="user" i]', '[data-type="user" i]', 'div[class*="user" i][class*="message" i]', 'div[class*="user" i][class*="msg" i]', 'div[class*="user" i][class*="content" i]', 'div[class*="chat" i][class*="user" i]', '.agent-chat__bubble--human', '.message-bubble', '.msg-content-container', '[class*="group/query"]', '[class*="questionItem"]', '[class*="roleUser"]', '[class*="UserPrompt" i]', '[class*="user-prompt" i]', '[class*="UserBubble" i]', '[class*="user-bubble" i]', 'div[class*="bg-offsetPlus"]'
+      ];
+      // 针对豆包等平台增加激进的备用选择器捕获
+      if (host.includes('doubao.com')) {
+        selectors.push(
+          '[data-testid="send_message"]',
+          '[data-testid="send_message"] [data-testid="message_text_content"]',
+          '[data-testid="send_message"] [data-testid="message_content"]',
+          'div[data-testid*="user"]',
+          'div[class*="user"][class*="msg"]',
+          'div[class*="userMessage"]',
+          '[class*="content-wrapper"] > div:not([class*="bot"])',
+          '[class*="bubble"][class*="user"]'
+        );
+      }
+    }
 
     const rawElements = Array.from(document.querySelectorAll(selectors.join(',')));
     if (!listEl || !pinnedList) return;
 
-    const visibleElements = rawElements.filter(el => {
+    // Grok 二次降级：如果主选择器返回 0（Grok 改版导致类名变动），按祖先 items-end 做判断
+    let candidateElements = rawElements;
+    if (isGrok && rawElements.length === 0) {
+      const fallback = Array.from(document.querySelectorAll('.message-bubble, [data-testid="message-bubble"]'));
+      candidateElements = fallback.filter(el => {
+        let node = el.parentElement;
+        while (node && node !== document.body) {
+          const cls = node.className || '';
+          // 排除 AI 回答侧容器
+          if (/\bitems-start\b/.test(cls) || /markdown|prose|response|assistant/i.test(cls)) return false;
+          // 保留用户侧容器（items-end = 右对齐）
+          if (/\bitems-end\b/.test(cls)) return true;
+          node = node.parentElement;
+        }
+        return false; // 无法确认为用户消息时丢弃
+      });
+    }
+
+    const visibleElements = candidateElements.filter(el => {
       const rect = el.getBoundingClientRect(); if (rect.width === 0 || rect.height === 0) return false;
       const style = window.getComputedStyle(el); if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false; return true;
     });
@@ -693,7 +899,7 @@
         if (host.includes('gemini.google.com')) return path.startsWith('/app') && path.length <= 5;
         if (host.includes('claude.ai')) return path === '/new' || path === '/';
         if (host.includes('kimi')) return path === '/';
-        if (host.includes('doubao.com')) return path === '/chat/' || path === '/chat';
+        if (host.includes('doubao.com')) return path === '/chat/' || path === '/chat' || path === '/';
         if (host.includes('yuanbao')) return path === '/chat/' || path === '/chat' || path === '/';
         if (host.includes('deepseek.com')) return path === '/';
         if (host.includes('tongyi.aliyun.com') || host.includes('qianwen')) return !search.includes('sessionId');
@@ -767,10 +973,35 @@
         item = document.createElement('div');
         item.className = 'ai-chat-nav-item'; item.dataset.refId = acnId;
         item.style.animation = 'navItemSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
-        item.innerHTML = `<div class="item-checkbox"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg></div><div class="item-text-content"></div><div class="item-star-btn" title="${t.starBtnTitle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>`;
+        item.innerHTML = `
+          <div class="item-checkbox"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+          <div class="item-more-btn" title="${t.moreItemTitle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg></div>
+          <div class="item-text-content"></div>
+          <div class="item-star-btn" title="${t.starBtnTitle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+        `;
 
         const textContent = item.querySelector('.item-text-content');
         const starBtn = item.querySelector('.item-star-btn');
+        const moreBtn = item.querySelector('.item-more-btn');
+
+        moreBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const rect = moreBtn.getBoundingClientRect();
+          const itemMenu = document.getElementById('ai-chat-nav-item-menu');
+          itemMenu.style.top = rect.top + 'px';
+          itemMenu.style.left = (rect.right + 4) + 'px';
+          itemMenu.classList.add('show');
+          // Update global active context
+          const activeMenuVar = 'activeMenuStarKey'; // We need access to the closure var or assign to window/AppState
+          // Let's use a simpler way: global window property for event context
+          window._acnActiveMenuStarKey = starKey;
+        });
+
+        // Small correction: The closure in bindUIEvents needs access to this key.
+        // Let's modify the listener in bindUIEvents to use a shared variable or data-attribute on the menu.
+        moreBtn.addEventListener('mousedown', () => {
+          document.getElementById('ai-chat-nav-item-menu').dataset.activeStarKey = starKey;
+        });
 
         starBtn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -793,7 +1024,10 @@
           if (tempVal.includes("❌") || tempVal.includes("未设置") || tempVal.includes("废弃")) { AppState.summaryCache.delete(baseMemKey); }
         }
 
-        if (AppState.summaryCache.has(baseMemKey)) {
+        // Initial Title Rendering (Prioritize Custom -> Cache -> Loading)
+        if (AppState.customTitles.has(starKey)) {
+          textContent.innerText = AppState.customTitles.get(starKey);
+        } else if (AppState.summaryCache.has(baseMemKey)) {
           textContent.innerText = AppState.summaryCache.get(baseMemKey);
         } else {
           item.classList.add('is-loading'); textContent.innerText = t.analyzing;
@@ -804,6 +1038,8 @@
             const finalResult = (res && res.success) ? res.summary : t.extractFailed;
             AppState.summaryCache.set(baseMemKey, finalResult); saveCacheToLocal();
 
+            if (AppState.customTitles.has(starKey)) return; // If manually renamed during loading
+
             // 同步更新保存的星标详情
             if (AppState.starredItems.has(starKey)) {
               const details = AppState.starredDetails.get(starKey);
@@ -812,14 +1048,18 @@
 
             textContent.style.opacity = '0';
             setTimeout(() => {
-              item.classList.remove('is-loading'); textContent.innerText = finalResult; textContent.style.opacity = '1'; applySearchFilter();
-              if (acnId === newlyAddedBottomId && !AppState.isExportMode) showPeekNotification(finalResult);
+              if (AppState.customTitles.has(starKey)) {
+                textContent.innerText = AppState.customTitles.get(starKey);
+              } else {
+                textContent.innerText = finalResult;
+              }
+              item.classList.remove('is-loading'); textContent.style.opacity = '1'; applySearchFilter();
+              if (acnId === newlyAddedBottomId && !AppState.isExportMode) showPeekNotification(textContent.innerText);
             }, 300);
           });
         }
       }
-      // === 新增：静默在本地秒提炼大纲，塞进卡片的自定义属性中 ===
-      item.dataset.outline = extractOutlineLocally(el);
+      // 取消静态赋值大纲，改为在鼠标 hover 时动态实时提炼
       item.onclick = (e) => {
         if (AppState.isExportMode) {
           e.preventDefault(); e.stopPropagation();
@@ -838,7 +1078,10 @@
           return;
         }
         AppState.isAutoScrolling = true; AppState.navMappings.forEach(m => m.navEl.classList.remove('active'));
-        item.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        item.classList.add('active');
+        // 查找行容器祖先：Grok 用 items-end，Perplexity 用 bg-offsetPlus，其他平台 el 本身即行容器
+        const scrollTarget = el.closest('div[class*="items-end"], div[class*="bg-offsetPlus"]') || el;
+        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // Increase lock time to 1200ms to reliably bypass browser bouncy scroll events
         clearTimeout(AppState.scrollTimeout); AppState.scrollTimeout = setTimeout(() => { AppState.isAutoScrolling = false; }, 1200);
       };
@@ -850,7 +1093,7 @@
       if (isNewlyCreated && index === uniqueMessages.length - 1 && AppState.lastMessageCount > 1) newlyAddedBottomId = acnId;
       if (isStarred) pinnedElements.push(item); else normalElements.push(item);
 
-      AppState.navMappings.push({ msgEl: el, navEl: item });
+      AppState.navMappings.push({ acnId, starKey, baseMemKey, msgEl: el, navEl: item });
     });
 
     // ====== 渲染属于本页面但还未加载到 DOM 里的幽灵记录 ======
@@ -867,9 +1110,10 @@
           item = document.createElement('div');
           item.className = 'ai-chat-nav-item is-starred is-ghost';
           item.dataset.refId = ghostId;
+          const displayTitle = AppState.customTitles.get(starKey) || details.title || '未知幽灵节点';
           item.innerHTML = `
                   <div class="item-checkbox"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                  <div class="item-text-content">${details.title || '未知幽灵节点'}</div>
+                  <div class="item-text-content">${displayTitle}</div>
                   <div class="item-star-btn" title="${t.starBtnTitle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
                 `;
 
@@ -903,9 +1147,13 @@
     const nav = document.getElementById('ai-chat-nav-container'); const peekEl = document.getElementById('ai-chat-nav-peek'); const header = document.getElementById('ai-chat-nav-header');
     if (!nav || !peekEl) return;
     if (nav.classList.contains('nav-collapsed') && !header.classList.contains('search-active')) {
-      clearTimeout(peekTimeout); peekEl.innerText = t.savedPrefix + text; nav.style.transition = 'height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-      nav.style.height = '100px'; nav.classList.add('peek-active');
-      peekTimeout = setTimeout(() => { nav.style.height = '44px'; nav.classList.remove('peek-active'); setTimeout(() => { if (nav.classList.contains('nav-collapsed')) nav.style.transition = 'none'; }, 400); }, 2500);
+      clearTimeout(peekTimeout); peekEl.innerText = t.savedPrefix + text;
+      nav.style.transition = 'height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
+      nav.style.height = '100px'; nav.style.width = '240px'; nav.classList.add('peek-active');
+      peekTimeout = setTimeout(() => {
+        nav.style.height = '44px'; nav.style.width = '44px'; nav.classList.remove('peek-active');
+        setTimeout(() => { if (nav.classList.contains('nav-collapsed')) nav.style.transition = 'none'; }, 400);
+      }, 2500);
     }
   }
 
@@ -973,6 +1221,12 @@
     nav.classList.remove('is-dark-theme');
   }
 
+  // 立即执行一次，避免等待首个 interval 导致深色模式闪烁
+  ensureNavUI();
+  // 若 document.body 尚未就绪，DOMContentLoaded 时再补一次
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => ensureNavUI(), { once: true });
+  }
   setInterval(syncTheme, 1000);
   setInterval(ensureNavUI, 1000);
   setInterval(highlightCurrentNav, 500);

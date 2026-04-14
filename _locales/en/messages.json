@@ -1,4 +1,4 @@
 {
-    "extName": { "message": "ChatThread: AI Chat Navigator" },
-    "extDesc": { "message": "Stop endless scrolling in long AI chats. Extract the core thread from massive AI chats. A minimalist, automated side navigation tool." }
+    "extName": { "message": "AI Timeline" },
+    "extDesc": { "message": "A minimalist, automated side navigation tool for AI chats that helps you locate key moments quickly." }
   }

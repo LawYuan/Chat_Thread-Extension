@@ -1,4 +1,4 @@
-# 💬 Chat脉络 (ChatThread)
+# 💬 AI时间线 (AI Timeline)
 
 [![Version](https://img.shields.io/badge/version-v3.0.1-blue.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Chrome-lightgrey.svg)]()
